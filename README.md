@@ -8,9 +8,7 @@ pip install -r requirements.txt
 ```
 
 ## Purpose
-when directly communicating with someone, discord stores your messages in plaintext. this is bad.
-
-additionally, you can sign messages (e.g. the hash of an image/video) with your private key to verify that you sent them.
+when directly communicating with someone, discord stores your messages in plaintext. this is bad. by encrypting messages and signing them, third parties cannot read your messages, but everyone can verify that you sent them. the exact purpose of this project is to increase confidentiality between users, but maintain accountability that Discord Trust & Saftey provides.
 
 ## Specifications
 ### Key generation
