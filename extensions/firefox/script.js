@@ -5,7 +5,11 @@
         return document.querySelectorAll("[class*='messageContent-']");
     }
 
-    // Write a function that converts a number into a base 2 array
+    const getUserID = () => {
+        let accountStorage = JSON.parse(localStorage.getItem("MultiAccountStore"));
+        return Math.ceil(Math.sqrt(Math.sqrt(accountStorage._state.users[0].id)));
+    }
+
     const toBase256 = (num) => {
         if (num === 0) return [0];
         let result = [];
@@ -16,25 +20,17 @@
         return new Uint8Array(result);
     }
 
-    const getUserID = () => {
-        let accountStorage = JSON.parse(localStorage.getItem("MultiAccountStore"));
-        return BigInt(accountStorage._state.users[0].id);
-    }
-
-    const keyGen = async (nbits=2048,exponent=65537) => {
-        console.log(`using public exponent ${toBase256(exponent)} and ${nbits} bits`);
+    const RSAKeyGen = async (exponent=65537) => {
         return await window.crypto.subtle.generateKey(
             {
                 name: "RSASSA-PKCS1-v1_5",
-                modulusLength: nbits,
+                modulusLength: 2048,
                 publicExponent: toBase256(exponent),
                 hash: {name: "SHA-256"}
             },
             true,
             ["sign", "verify"]
         );
-        print("good");
-        //return await keys;
     }
 
     document.addEventListener("click", (e) => {
@@ -49,22 +45,44 @@
 
     const UID = getUserID();
     console.log(`UID: ${UID}`);
-    keyGen(2048,UID)
-    .then(async (keys) => {
-        console.log("success!");
-        await crypto.subtle.exportKey("jwk", keys.publicKey)
-        .then((key) => {
-            // ATTN: THIS IS NOT SECURE I REPEAT THIS IS NOT SECURE
-            localStorage.setItem("publicKey", JSON.stringify(key));
-        });
-        await crypto.subtle.exportKey("jwk", keys.privateKey)
-        .then((key) => {
-            // WHATEVER YOU DO DO NOT USE THIS YET
-            localStorage.setItem("privateKey", JSON.stringify(key));
-        });
+
+    // This is for testing purposes only; when set to 1, it will clear the storage
+    if (1) {
+        browser.storage.local.set({publicKey: null, privateKey: null});
+        console.log("cleared storage");
+    }
+
+    browser.storage.local.get(["publicKey","privateKey"])
+    .then((keys) => {
+        // Ensure that public and private keys exist
+        if (keys.publicKey && keys.privateKey) {
+            console.log("keys: ", keys);
+        } else {
+            // ... otherwise generate them
+            console.log("generating keys...");
+            RSAKeyGen(UID)
+            .then(async (keys) => {
+                console.log("keys generated");
+                await crypto.subtle.exportKey("jwk", keys.publicKey)
+                .then((key) => {
+                    // TODO: publish key to server
+                    // ATTN: THIS IS NOT SECURE I REPEAT THIS IS NOT SECURE
+                    browser.storage.local.set({publicKey: key});
+                    console.log("stored public key")
+                });
+                await crypto.subtle.exportKey("jwk", keys.privateKey)
+                .then((key) => {
+                    // WHATEVER YOU DO DO NOT USE THIS YET
+                    browser.storage.local.set({privateKey: key});
+                    console.log("stored private key")
+                });
+            })
+            .catch((err) => {
+                console.error("keygen error: ", err);
+            });
+        }
     })
     .catch((err) => {
-        console.error("error: ", err);
+        console.error("storage error: ", err);
     });
-    
 })();

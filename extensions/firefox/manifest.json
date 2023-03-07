@@ -11,5 +11,8 @@
             "matches": ["*://discord.com/channels/@me/*"],
             "js": ["script.js"]
         }
+    ],
+    "permissions": [
+        "storage"
     ]
 }
