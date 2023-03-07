@@ -1,0 +1,15 @@
+{
+    "manifest_version": 2,
+    "name": "My Extension",
+    "version": "1.0",
+    "description": "Simple test extension",
+    "icons": {
+        "48": "icons/icon.png"
+    },
+    "content_scripts": [
+        {
+            "matches": ["*://discord.com/channels/@me/*"],
+            "js": ["script.js"]
+        }
+    ]
+}
