@@ -1,18 +1,19 @@
 {
     "manifest_version": 2,
-    "name": "My Extension",
-    "version": "1.0",
-    "description": "Simple test extension",
+    "name": "Discord PGP",
+    "version": "0.0.1",
+    "description": "PGP messaging for Discord",
     "icons": {
         "48": "icons/icon.png"
     },
     "content_scripts": [
         {
             "matches": ["*://discord.com/channels/@me/*"],
-            "js": ["script.js"]
+            "js": ["discord.js"]
         }
     ],
     "permissions": [
-        "storage"
+        "storage",
+        "webRequest"
     ]
 }

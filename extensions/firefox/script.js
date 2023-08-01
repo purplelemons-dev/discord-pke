@@ -10,6 +10,7 @@
         return Math.ceil(Math.sqrt(Math.sqrt(accountStorage._state.users[0].id)));
     }
 
+    /*
     const toBase256 = (num) => {
         if (num === 0) return [0];
         let result = [];
@@ -19,8 +20,69 @@
         }
         return new Uint8Array(result);
     }
+    */
 
-    const RSAKeyGen = async (exponent=65537) => {
+    const deriveKey = async (privateKey, publicKey) => {
+        // Private key should be local user's private ECDH key, public key should be the other user's public ECDH key
+        return await window.crypto.subtle.deriveKey(
+            {
+                name: "ECDH",
+                public: publicKey
+            },
+            privateKey,
+            {
+                name: "AES-GCM",
+                length: 256
+
+            },
+            true,
+            ["encrypt", "decrypt"]
+        );
+    }
+
+    const keyGenECDH = async () => {
+        return await window.crypto.subtle.generateKey(
+            {
+                name: "ECDH",
+                namedCurve: "P-384"
+            },
+            true,
+            ["deriveKey"]
+        );
+    }
+
+    const exportECDH = async (key) => {
+        // Used in order to send the public key to the other user
+        return await window.crypto.subtle.exportKey("jwk", key);
+    }
+
+    const importECDH = async (key) => {
+        // Get the public key from the user and import it in order to generate a shared key
+        return await window.crypto.subtle.importKey(
+            "jwk",
+            key,
+            {
+                name: "ECDH",
+                namedCurve: "P-384"
+            },
+            true,
+            ["deriveKey"]
+        );
+    }
+
+    const encrypt = async (key, data) => {
+        return await window.crypto.subtle.encrypt(
+            {
+                name: "AES-GCM",
+                iv: window.crypto.getRandomValues(new Uint8Array(12))
+            },
+            key,
+            data
+        );
+    }
+
+
+    /*const RSAKeyGen = async (exponent=65537) => {
         return await window.crypto.subtle.generateKey(
             {
                 name: "RSASSA-PKCS1-v1_5",
@@ -31,7 +93,7 @@
             true,
             ["sign", "verify"]
         );
-    }
+    }*/
 
     document.addEventListener("click", (e) => {
         let target = e.target;

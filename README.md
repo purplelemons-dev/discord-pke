@@ -3,20 +3,27 @@
 thing
 
 ## Installation
+### Python client
 ```
 pip install -r requirements.txt
 ```
+### Web extension
+1. Go to [extensions](./extensions/) and choose the browser folder that matches your browser.
+2. TODO: add instructions for installing the extension
+3. Install [OpenPGP.js](https://unpkg.com/openpgp@5.9.0/dist/openpgp.min.js) and save as `./extensions/<extension>/openpgp.min.js`
 
 ## Purpose
 when directly communicating with someone, discord stores your messages in plaintext. this is bad. by encrypting messages and signing them, third parties cannot read your messages, but everyone can verify that you sent them. the exact purpose of this project is to increase confidentiality between users, but maintain accountability that Discord Trust & Saftey provides.
 
 ## Specifications
-### Key generation
+### RSA Key Generation
 1. Get the Discord ID (`id`) of user.
 2. Turn `id` into a 32-byte hash using SHA-256. This should prevent username collisions.
 3. Encode the hash in base64.
 4. Let `e` be the next prime after the sum of the output of step 3.
 5. Generate 2048-bit RSA keys with `e` as the public exponent.
+### Diffie-Hellman Key generation
+1. 
 
 See [implimentation](#implimentation) for more details.
 
